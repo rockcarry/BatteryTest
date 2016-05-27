@@ -1,7 +1,5 @@
 package com.fanfan.batterytest;
 
-import java.io.DataInputStream;
-import java.io.InputStream;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
