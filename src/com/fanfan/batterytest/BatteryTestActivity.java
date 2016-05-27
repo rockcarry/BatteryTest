@@ -1,4 +1,4 @@
-package com.jbs.test;
+package com.fanfan.batterytest;
 
 import java.io.DataInputStream;
 import java.io.InputStream;
