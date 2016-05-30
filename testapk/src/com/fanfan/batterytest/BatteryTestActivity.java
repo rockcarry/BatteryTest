@@ -1,22 +1,38 @@
 package com.fanfan.batterytest;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
-import java.io.*;
+import android.util.Log;
 import java.util.*;
 
 public class BatteryTestActivity extends Activity {
-    private static final String BATTERY_LOG_FILE = "/sdcard/battery.log";
+    private static final String TAG = "BatteryTestActivity";
+
+    private BatteryTestService mBatServ = null;
+    private ServiceConnection mBatServiceConn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder serv) {
+            mBatServ = ((BatteryTestService.BatteryTestBinder)serv).getService(mBatteryEventListener);
+            mBtnStartStopTest.setText(mBatServ.isTestStarted() ? R.string.btn_stop_test : R.string.btn_start_test);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mBatServ = null;
+        }
+    };
 
     private Button   mBtnStartStopTest;
     private ListView mLstBatteryInfo;
-    private boolean  mStarted;
-    private int      mCurTime;
 
     private ArrayAdapter      mListAdapter;
     private ArrayList<String> mBatInfoList;
@@ -33,6 +49,36 @@ public class BatteryTestActivity extends Activity {
         mBatInfoList = new ArrayList<String>();
         mListAdapter = new ArrayAdapter(this, R.layout.item, mBatInfoList);
         mLstBatteryInfo.setAdapter(mListAdapter);
+
+        // start record service
+        Intent i = new Intent(BatteryTestActivity.this, BatteryTestService.class);
+        startService(i);
+
+        // bind record service
+        bindService(i, mBatServiceConn, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy");
+
+        // unbind record service
+        unbindService(mBatServiceConn);
+
+        // stop record service
+        Intent i = new Intent(BatteryTestActivity.this, BatteryTestService.class);
+        stopService(i);
+
+        super.onDestroy();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mBatServ != null) {
+            mBtnStartStopTest.setText(mBatServ.isTestStarted() ?
+                R.string.btn_stop_test : R.string.btn_start_test);
+        }
     }
 
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
@@ -40,87 +86,28 @@ public class BatteryTestActivity extends Activity {
         public void onClick(View v) {
             switch (v.getId()) {
             case R.id.btn_start_Stop:
-                if (!mStarted) {
-                    mCurTime = 0;
-                    mBatInfoList.clear();
-
-                    try {
-                        File file = new File(BATTERY_LOG_FILE);
-                        file.delete();
-                        file.createNewFile();
-                        appendTextToFile(BATTERY_LOG_FILE, "time      voltage   percent   current   \n");
-                        appendTextToFile(BATTERY_LOG_FILE, "----------------------------------------\n");
-                    } catch (IOException e) { e.printStackTrace(); }
-
-                    mBtnStartStopTest.setText(R.string.btn_stop_test);
-                    mTimerHandler.post(mTimerRunnable);
+                if (mBatServ.isTestStarted()) {
+                    mBtnStartStopTest.setText(R.string.btn_start_test);
+                    mBatServ.stopBatteryTest();
                 }
                 else {
-                    mBtnStartStopTest.setText(R.string.btn_start_test);
-                    mTimerHandler.removeCallbacks(mTimerRunnable);
+                    mBatInfoList.clear();
+                    mBtnStartStopTest.setText(R.string.btn_stop_test);
+                    mBatServ.startBatteryTest();
                 }
-                mStarted = !mStarted;
                 break;
             }
         }
     };
 
-    private static final int TIMER_DELAY = 60*1000;
-    private Handler  mTimerHandler  = new Handler();
-    private Runnable mTimerRunnable = new Runnable() {
+    private BatteryTestService.BatteryTestEventListener mBatteryEventListener = new BatteryTestService.BatteryTestEventListener() {
         @Override
-        public void run() {
-            mTimerHandler.postDelayed(this, TIMER_DELAY);
-
-            int cap  = Integer.parseInt(execCmdRetOut("cat /sys/class/power_supply/battery/capacity")); 
-            int vol  = Integer.parseInt(execCmdRetOut("cat /sys/class/power_supply/battery/voltage_now")) / 1000;
-            int cur  = Integer.parseInt(execCmdRetOut("cat /sys/class/power_supply/battery/current_now")) / 1000; 
-            mCurTime+= 1;
-            String str = String.format("%-10d%-10d%-10d%-10d\n", mCurTime, vol, cap, cur);
+        public void onBatteryTestEvent(String str) {
             mBatInfoList.add(str);
             mListAdapter.notifyDataSetChanged();
             mLstBatteryInfo.setSelection(mBatInfoList.size());
-            appendTextToFile(BATTERY_LOG_FILE, str);
         }
     };
-
-
-    private static void appendTextToFile(String file, String text) {
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(file, true);
-            writer.write(text);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (writer != null) {
-                    writer.close();
-                }
-            } catch (IOException e) { e.printStackTrace(); }
-        }
-    }
-
-    public static String execCmdRetOut(String cmd) {
-        try {
-            Process mProcess = Runtime.getRuntime().exec(cmd);
-            try {
-                mProcess.waitFor();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return e.getMessage();
-            }
-            InputStream inputStream = mProcess.getInputStream();
-            DataInputStream dataInputStream = new DataInputStream(inputStream);
-            String out = dataInputStream.readLine();
-            inputStream.close();
-            dataInputStream.close();
-            return out;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return e.getMessage();
-        }
-    }
 }
 
 
