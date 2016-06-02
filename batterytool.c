@@ -13,14 +13,14 @@ int main(int argc, char *argv[])
 {
     FILE *fpin = NULL;
     FILE *fpout= NULL;
-    int   line = 0;
+    int   lines= 0;
     int  *vlist= NULL;
     char  buf[256];
     int   pmu   [32] = { 3130, 3270, 3340, 3410, 3480, 3520, 3550, 3570, 3590, 3610, 3630, 3640, 3660, 3700, 3730, 3770,
                          3778, 3800, 3820, 3840, 3850, 3870, 3910, 3940, 3980, 4010, 4050, 4080, 4100, 4120, 4140, 4150 };
     int   params[32] = { 0 };
     int   min, voltage, percent, current;
-    int   rdc = 100;
+    int   rdc = 50;
     int   i, j;
 
     if (argc >= 2) {
@@ -33,19 +33,19 @@ int main(int argc, char *argv[])
     while (1) {
         int data = fgetc(fpin);
         if (data == EOF ) break;
-        if (data == '\n') line++;
+        if (data == '\n') lines++;
     }
-//  printf("total line: %d\n", line);
-    line -= 2; // skip first two lines
+//  printf("total lines: %d\n", lines);
+    lines -= 2; // skip first two lines
 
-    vlist = (int*)malloc(sizeof(int) * line);
+    vlist = (int*)malloc(sizeof(int) * lines);
     if (!vlist) goto done;
 
     //++ read voltage data
     fseek(fpin, 0, SEEK_SET);
     fgets(buf, 256, fpin); // skip first line
     fgets(buf, 256, fpin); // skip second line
-    for (i=0; i<line; i++) {
+    for (i=0; i<lines; i++) {
         fscanf(fpin, "%d %d %d %d", &min, &voltage, &percent, &current);
         vlist[i] = voltage - current * rdc / 1000;
 //      printf("%d\n", vlist[i]);
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     //-- read voltage data
 
     // sort vlist
-    qsort(vlist, line, sizeof(int), cmp_int_item);
+    qsort(vlist, lines, sizeof(int), cmp_int_item);
 
     //++ calculate params for pmu
     for (i=0,j=0; i<32; i++) {
@@ -63,9 +63,9 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        for (; j<line; j++) {
+        for (; j<lines; j++) {
             if (pmu[i] <= vlist[j]) {
-                params[i] = 100 * j / line;
+                params[i] = 100 * j / lines;
                 break;
             }
         }
