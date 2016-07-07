@@ -2,20 +2,35 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="horizontal" >
 
-    <Button
-        android:id="@+id/btn_start_Stop"
-        android:layout_width="fill_parent"
-        android:layout_height="58dp"
-        android:text="@string/btn_start_test"
-        android:textSize="25dp"
-        android:gravity="center" />
-
-    <ListView
-        android:id="@+id/lst_bat_info"
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:gravity="center" />
+        android:layout_weight="1.0"
+        android:orientation="vertical" >
+        <Button
+            android:id="@+id/btn_start_Stop"
+            android:layout_width="fill_parent"
+            android:layout_height="58dp"
+            android:text="@string/btn_start_test"
+            android:textSize="25dp"
+            android:gravity="center" />
+
+        <ListView
+            android:id="@+id/lst_bat_info"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txt_bat_info"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="2.0"
+        android:paddingLeft="12dp"
+        android:textSize="25dp"
+        android:gravity="left" />
 
 </LinearLayout>
