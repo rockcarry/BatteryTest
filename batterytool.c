@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define BAT_LOW_VOL     3500
+#define BAT_LOW_VOL     3400
 #define OUT_PARAMS_FMT  "pmu_bat_para%-2d  = %d\n"
 
 static int cmp_int_item(const void *a, const void *b)
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
                          3778, 3800, 3820, 3840, 3850, 3870, 3910, 3940, 3980, 4010, 4050, 4080, 4100, 4120, 4140, 4150 };
     int   params[32] = { 0 };
     int   min, voltage, percent, current;
-    int   rdc = 50;
+    int   rdc = 100;
     int   i, j;
 
     if (argc >= 2) {
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     fgets(buf, 256, fpin); // skip second line
     for (i=0; i<lines; i++) {
         fscanf(fpin, "%d %d %d %d", &min, &voltage, &percent, &current);
-        vlist[i] = voltage - current * rdc / 1000;
+        vlist[i] = voltage + current * rdc / 1000;
 //      printf("%d\n", vlist[i]);
         if (feof(fpin)) break;
     }
