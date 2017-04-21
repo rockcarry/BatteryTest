@@ -76,8 +76,8 @@ public class BatteryTestService extends Service
             File file = new File(BATTERY_LOG_FILE);
             file.delete();
             file.createNewFile();
-            appendTextToFile(BATTERY_LOG_FILE, "time      voltage   percent   current   \n");
-            appendTextToFile(BATTERY_LOG_FILE, "----------------------------------------\n");
+            appendTextToFile(BATTERY_LOG_FILE, "time      voltage   percent   current   temp      \n");
+            appendTextToFile(BATTERY_LOG_FILE, "--------------------------------------------------\n");
 
             mStarted = true;
             mCurTime = 0;
@@ -104,8 +104,9 @@ public class BatteryTestService extends Service
             int cap  = Integer.parseInt(execCmdRetOut("cat /sys/class/power_supply/battery/capacity")); 
             int vol  = Integer.parseInt(execCmdRetOut("cat /sys/class/power_supply/battery/voltage_now")) / 1000;
             int cur  = Integer.parseInt(execCmdRetOut("cat /sys/class/power_supply/battery/current_now")) / 1000; 
+            int temp = Integer.parseInt(execCmdRetOut("cat /sys/class/power_supply/battery/temp")) / 10; 
             mCurTime+= 1;
-            String str = String.format("%-10d%-10d%-10d%-10d\n", mCurTime, vol, cap, cur);
+            String str = String.format("%-10d%-10d%-10d%-10d%-10d\n", mCurTime, vol, cap, cur, temp);
             appendTextToFile(BATTERY_LOG_FILE, str);
 
             if (mListener != null) {
