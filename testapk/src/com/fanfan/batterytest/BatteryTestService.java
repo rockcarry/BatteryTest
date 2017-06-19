@@ -94,7 +94,7 @@ public class BatteryTestService extends Service
         }
     }
 
-    private static final int TIMER_DELAY = 60*1000;
+    private static final int TIMER_DELAY = 30*1000;
     private Handler  mTimerHandler  = new Handler();
     private Runnable mTimerRunnable = new Runnable() {
         @Override
