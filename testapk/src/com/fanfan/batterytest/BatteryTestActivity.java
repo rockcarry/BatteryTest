@@ -99,6 +99,15 @@ public class BatteryTestActivity extends Activity {
         unregisterReceiver(mBroadcastReceiver);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (true) {
+            moveTaskToBack(true);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
