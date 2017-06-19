@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1.0"
+        android:layout_weight="4.0"
         android:orientation="vertical" >
         <Button
             android:id="@+id/btn_start_Stop"
@@ -28,7 +28,7 @@
         android:id="@+id/txt_bat_info"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="2.0"
+        android:layout_weight="5.0"
         android:paddingLeft="12dp"
         android:textSize="25dp"
         android:gravity="left" />

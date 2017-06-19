@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Typeface;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -50,6 +51,7 @@ public class BatteryTestActivity extends Activity {
         mBtnStartStopTest = (Button  )findViewById(R.id.btn_start_Stop);
         mLstBatteryInfo   = (ListView)findViewById(R.id.lst_bat_info  );
         mTxtBatteryInfo   = (TextView)findViewById(R.id.txt_bat_info  );
+        mTxtBatteryInfo  .setTypeface(Typeface.MONOSPACE, Typeface.NORMAL);
         mBtnStartStopTest.setOnClickListener(mOnClickListener);
 
         mBatInfoList = new ArrayList<String>();
@@ -195,24 +197,18 @@ public class BatteryTestActivity extends Activity {
                     break;
                 }
 
-                String s = "BatteryTest tool v1.0.0\n"
-                         + "CopyRight by Apical\n\n"
+                String s = "BatteryTest tool v1.0.1\n\n"
                          + "battery info:\n"
-                         + "status - " + statusString + "\n"
-                         + "health - " + healthString + "\n"
-                         + "present - " + String.valueOf(present) + "\n"
-                         + "level - " + String.valueOf(level) + "\n"
-                         + "scale - " + String.valueOf(scale) + "\n"
-                         + "plugged - " + acString + "\n"
-                         + "voltage - " + String.valueOf(voltage) + "\n"
+                         + "status      - " + statusString + "\n"
+                         + "health      - " + healthString + "\n"
+                         + "present     - " + String.valueOf(present) + "\n"
+                         + "level       - " + String.valueOf(level) + "\n"
+                         + "scale       - " + String.valueOf(scale) + "\n"
+                         + "plugged     - " + acString + "\n"
+                         + "voltage     - " + String.valueOf(voltage) + "\n"
                          + "temperature - " + String.valueOf(temperature) + "\n"
-                         + "technology - " + technology + "\n\n"
-                         + "Note:\n"
-                         + "Click START TEST Button\n"
-                         + "to record battery log,\n"
-                         + "then press HOME to\n"
-                         + "make it run in\n"
-                         + "background.\n";
+                         + "technology  - " + technology + "\n\n"
+                         + "Click START TEST button to record battery log.\n";
                 mTxtBatteryInfo.setText(s);
             }
         }
