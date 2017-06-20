@@ -14,8 +14,8 @@ import android.os.IBinder;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.util.Log;
 import java.util.*;
 
@@ -38,7 +38,7 @@ public class BatteryTestActivity extends Activity {
 
     private Button   mBtnStartStopTest;
     private ListView mLstBatteryInfo;
-    private TextView mTxtBatteryInfo;
+    private EditText mTxtBatteryInfo;
 
     private ArrayAdapter      mListAdapter;
     private ArrayList<String> mBatInfoList;
@@ -50,7 +50,7 @@ public class BatteryTestActivity extends Activity {
         setContentView(R.layout.main);
         mBtnStartStopTest = (Button  )findViewById(R.id.btn_start_Stop);
         mLstBatteryInfo   = (ListView)findViewById(R.id.lst_bat_info  );
-        mTxtBatteryInfo   = (TextView)findViewById(R.id.txt_bat_info  );
+        mTxtBatteryInfo   = (EditText)findViewById(R.id.txt_bat_info  );
         mTxtBatteryInfo  .setTypeface(Typeface.MONOSPACE, Typeface.NORMAL);
         mBtnStartStopTest.setOnClickListener(mOnClickListener);
 

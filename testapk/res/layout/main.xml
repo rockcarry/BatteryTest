@@ -24,13 +24,14 @@
             android:gravity="center" />
     </LinearLayout>
 
-    <TextView
+    <EditText
         android:id="@+id/txt_bat_info"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="5.0"
         android:paddingLeft="12dp"
         android:textSize="25dp"
-        android:gravity="left" />
+        android:gravity="left"
+        android:editable="false" />
 
 </LinearLayout>
