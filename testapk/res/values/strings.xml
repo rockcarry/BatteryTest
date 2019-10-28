@@ -4,5 +4,5 @@
     <string name="app_name">BatteryTest</string>
     <string name="btn_start_test">start test</string>
     <string name="btn_stop_test">stop test</string>
-
+    <string name="battery_log_is_recording">battery log is recording...</string>
 </resources>

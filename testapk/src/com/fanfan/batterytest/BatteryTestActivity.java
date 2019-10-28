@@ -6,6 +6,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.ServiceConnection;
 import android.graphics.Typeface;
 import android.os.BatteryManager;
@@ -64,6 +67,23 @@ public class BatteryTestActivity extends Activity {
 
         // bind record service
         bindService(i, mBatServiceConn, Context.BIND_AUTO_CREATE);
+
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(
+                  getApplicationInfo().packageName, PackageManager.GET_PERMISSIONS);
+
+            if (packageInfo.requestedPermissions != null) {
+                for (String permission : packageInfo.requestedPermissions) {
+                    Log.v(TAG, "Checking permissions for: " + permission);
+                    if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(packageInfo.requestedPermissions, 1);
+                        return;
+                    }
+                }
+            }
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Unable to load package's permissions", e);
+        }
     }
 
     @Override

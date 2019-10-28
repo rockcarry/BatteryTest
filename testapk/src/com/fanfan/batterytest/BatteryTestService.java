@@ -1,5 +1,8 @@
 package com.fanfan.batterytest;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -76,16 +79,18 @@ public class BatteryTestService extends Service
             File file = new File(BATTERY_LOG_FILE);
             file.delete();
             file.createNewFile();
-            appendTextToFile(BATTERY_LOG_FILE, "time      voltage   percent   current   temp      \n");
-            appendTextToFile(BATTERY_LOG_FILE, "--------------------------------------------------\n");
+            appendTextToFile(BATTERY_LOG_FILE, " time    percent    voltage     current  bat_temp  cpu_temp  gpu_temp \n");
+            appendTextToFile(BATTERY_LOG_FILE, "----------------------------------------------------------------------\n");
 
             mStarted = true;
             mCurTime = 0;
             mTimerHandler.post(mTimerRunnable);
         } catch (IOException e) { e.printStackTrace(); }
+        showNotification(this, true, getString(R.string.battery_log_is_recording));
     }
 
     public void stopBatteryTest() {
+        showNotification(this, false, null);
         mTimerHandler.removeCallbacks(mTimerRunnable);
         mStarted = false;
 
@@ -94,19 +99,45 @@ public class BatteryTestService extends Service
         }
     }
 
-    private static final int TIMER_DELAY = 30*1000;
+    private static final int TIMER_DELAY = 10*1000;
     private Handler  mTimerHandler  = new Handler();
     private Runnable mTimerRunnable = new Runnable() {
         @Override
         public void run() {
             mTimerHandler.postDelayed(this, TIMER_DELAY);
 
-            int cap  = Integer.parseInt(execCmdRetOut("cat /sys/class/power_supply/battery/capacity")); 
-            int vol  = Integer.parseInt(execCmdRetOut("cat /sys/class/power_supply/battery/voltage_now")) / 1000;
-            int cur  = Integer.parseInt(execCmdRetOut("cat /sys/class/power_supply/battery/current_now")) / 1000; 
-            int temp = Integer.parseInt(execCmdRetOut("cat /sys/class/power_supply/battery/temp")) / 10; 
+            float vol = 0, cur = 0, tempb = 0, tempc = 0, tempg = 0;
+            int   cap = 0;
+            BufferedReader br = null;
+
+            try {
+                br = new BufferedReader(new InputStreamReader(new FileInputStream("/sys/class/power_supply/battery/capacity")));
+                cap  = Integer.parseInt(br.readLine()) ;
+                br.close();
+
+                br = new BufferedReader(new InputStreamReader(new FileInputStream("/sys/class/power_supply/battery/voltage_now")));
+                vol  = Float.parseFloat(br.readLine()) / 1000000;
+                br.close();
+
+                br = new BufferedReader(new InputStreamReader(new FileInputStream("/sys/class/power_supply/battery/current_now")));
+                cur  = Float.parseFloat(br.readLine()) / 1000;
+                br.close();
+
+                br = new BufferedReader(new InputStreamReader(new FileInputStream("/sys/class/power_supply/battery/temp")));
+                tempb = Float.parseFloat(br.readLine()) / 10;
+                br.close();
+
+                br = new BufferedReader(new InputStreamReader(new FileInputStream("/sys/class/thermal/thermal_zone0/temp")));
+                tempc = Float.parseFloat(br.readLine()) / 1;
+                br.close();
+
+                br = new BufferedReader(new InputStreamReader(new FileInputStream("/sys/class/thermal/thermal_zone1/temp")));
+                tempg = Float.parseFloat(br.readLine()) / 1;
+                br.close();
+            } catch (Exception e) { e.printStackTrace(); }
+
             mCurTime+= 1;
-            String str = String.format("%-10d%-10d%-10d%-10d%-10d\n", mCurTime, vol, cap, cur, temp);
+            String str = String.format("%5d  %8d%%  %8.3fV  %8dmA  %8.1f  %8.1f  %8.1f\n", mCurTime, cap, vol, (int)cur, tempb, tempc, tempg);
             appendTextToFile(BATTERY_LOG_FILE, str);
 
             if (mListener != null) {
@@ -131,24 +162,19 @@ public class BatteryTestService extends Service
         }
     }
 
-    private static String execCmdRetOut(String cmd) {
-        try {
-            Process mProcess = Runtime.getRuntime().exec(cmd);
-            try {
-                mProcess.waitFor();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return e.getMessage();
-            }
-            InputStream inputStream = mProcess.getInputStream();
-            DataInputStream dataInputStream = new DataInputStream(inputStream);
-            String out = dataInputStream.readLine();
-            inputStream.close();
-            dataInputStream.close();
-            return out;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return e.getMessage();
+    private static final int NOTIFICATION_ID = 1;
+    private static Notification        mNotification = new Notification();
+    private static NotificationManager mNotifyManager= null;
+    private static void showNotification(Context context, boolean show, String msg) {
+        if (mNotifyManager == null) mNotifyManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (show) {
+            PendingIntent pi    = PendingIntent.getActivity(context, 0, new Intent(context, BatteryTestActivity.class), 0);
+            mNotification.flags = Notification.FLAG_ONGOING_EVENT;
+            mNotification.icon  = R.drawable.ic_launcher;
+            mNotification.setLatestEventInfo(context, context.getResources().getString(R.string.app_name), msg, pi);
+            mNotifyManager.notify(NOTIFICATION_ID, mNotification);
+        } else {
+            mNotifyManager.cancel(NOTIFICATION_ID);
         }
     }
 }
