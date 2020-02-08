@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define BAT_LOW_VOL     3400
+#define BAT_LOW_VOL     3300
 #define OUT_PARAMS_FMT  "pmu_bat_para%-2d  = %d\n"
 
 static int cmp_int_item(const void *a, const void *b)
@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
     int   lines= 0;
     int  *vlist= NULL;
     char  buf[256];
-    int   pmu   [32] = { 3130, 3270, 3340, 3410, 3480, 3520, 3550, 3570, 3590, 3610, 3630, 3640, 3660, 3700, 3730, 3770,
-                         3778, 3800, 3820, 3840, 3850, 3870, 3910, 3940, 3980, 4010, 4050, 4080, 4100, 4120, 4140, 4150 };
+    int   pmu   [32] = { 3133, 3273, 3344, 3414, 3485, 3555, 3590, 3608, 3626, 3643, 3661, 3696, 3731, 3766, 3802, 3819,
+                         3837, 3854, 3872, 3907, 3942, 3978, 4013, 4048, 4083, 4118, 4136, 4154, 4189, 4224, 4259, 4294 };
     int   params[32] = { 0 };
     int   min, voltage, percent, current;
     int   rdc = 100;
